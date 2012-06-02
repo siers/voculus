@@ -3,9 +3,11 @@
 
 #include <stdint.h>
 
+#include "thread.h"
+
 #include "log.h"
-#include "video.h"
-#include "logic.h"
-#include "graph.h"
+#include "video/video.h"
+#include "logic/logic.h"
+#include "graph/graph.h"
 
 #endif /* EVERYTHING_H */

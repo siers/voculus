@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Isrc/{video,logic,graph} -Isrc -Wall -Wextra -c -g3 -o
+CFLAGS = -Isrc -Wall -Wextra -c -g3 -Isrc -o
 LDFLAGS = -lpthread
-OBJ = bin/log.o bin/video/video.o bin/logic/logic.o bin/graph/graph.o bin/main.o
+OBJ = bin/log.o bin/thread.o bin/video/video.o bin/logic/logic.o bin/graph/graph.o bin/main.o
 
 all: bin bin/voculus
 
@@ -23,4 +23,4 @@ bin:
 	mkdir -p bin/graph
 
 clean:
-	rm bin -r
+	rm bin/* -fr

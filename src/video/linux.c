@@ -13,6 +13,8 @@
 
 #include <linux/videodev2.h>
 
+#include "everything.h"
+
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
 typedef enum {
@@ -603,7 +605,6 @@ video_specific_init()
     dev_name = "/dev/video";
     open_device ();
     init_device ();
-    start_capturing ();
 
     return 0;
 }

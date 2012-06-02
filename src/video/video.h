@@ -1,13 +1,10 @@
-#ifndef VIDEO_H
-#define VIDEO_H
+#pragma once
 
 int video_init();
 int video_die();
 
 struct video {
-    int width = 640;
-    int height = 480;
+    int width;
+    int height;
     int fd;
 } video;
-
-#endif /* VIDEO_H */

@@ -3,6 +3,7 @@
 
 #ifdef __linux
 #include "video/linux.h"
+#include "video/linux.c"
 #endif /* __linux */
 
 /* the sane defaults */
