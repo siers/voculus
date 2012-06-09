@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 #include <stdlib.h>
 
@@ -23,15 +22,13 @@ enum {
     log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 #define assert(condition, fmt, ...) \
-    if (!condition) \
+    if (!(condition)) \
         log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__); \
 
 #define assert_fatal(condition, fmt, ...) \
-    if (!condition) { \
+    if (!(condition)) { \
         log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__); \
-        exit(128); \
+        exit(EXIT_FAILURE); \
     }
 
 void log_whine(int msgloglvl, char* file, int line, const char *fmt, ...);
-
-#endif /* LOG_H */

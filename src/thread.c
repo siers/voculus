@@ -17,7 +17,7 @@ join(thread_t thread)
 
     assert_fatal(pthread_join(thread, &retval) == 0,
             "thread joined with errors");
-    log("thread.join");
+    log_d("thread.join");
 }
 
 void
