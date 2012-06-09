@@ -16,13 +16,14 @@ join(thread_t thread)
     void *retval;
 
     assert_fatal(pthread_join(thread, &retval) == 0,
-            "thread joined with errors")
+            "thread joined with errors");
+    log("thread.join");
 }
 
 void
 threads_join()
 {
-    while (--main_thread_count) {
+    while (main_thread_count--) {
         join(threads[main_thread_count]);
     }
 }

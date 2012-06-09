@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "everything.h"
-
 int loglvl = (uint16_t) -1; /* everything */
 
 int

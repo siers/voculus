@@ -59,18 +59,16 @@ static void
 process_image(const void * p)
 {
     int i, j;
-    char scale[] = "12345678";
+    char scale[] = " .,:;!#$";
     unsigned char luma;
 
-    for (j = 0; j < 480; j ++) {
-        for (i = 640; i; i --) {
+    for (j = 0; j < 480; j+=8) {
+        for (i = 640; i > 0; i-=8) {
             luma = ((unsigned char*) p)[(i + j * 640)*2];
             fputc(scale[(int) ((1 - luma / 255.0) * sizeof scale)], stdout);
         }
         fputc('\n',stdout);
     }
-    fputc ('\n', stdout);
-    fputc ('\n', stdout);
     fflush (stdout);
 }
 
@@ -199,8 +197,7 @@ capture()
             exit (EXIT_FAILURE);
         }
 
-        if (read_frame ())
-            break;
+        assert(read_frame() == 1, "error when reading frame");
     }
 }
 
@@ -445,14 +442,12 @@ init_device(void)
     queryctrl.id = V4L2_CID_BRIGHTNESS;
 
     if (-1 == ioctl (fd, VIDIOC_QUERYCTRL, &queryctrl)) {
-        if (errno != EINVAL) {
-            perror ("VIDIOC_QUERYCTRL");
-            exit (EXIT_FAILURE);
-        } else {
-            printf ("V4L2_CID_BRIGHTNESS is not supported\n");
-        }
+        if (errno != EINVAL)
+            log("failure on ioctl.VIDIOC_QUERYCTRL");
+        else
+            log("V4L2_CID_BRIGHTNESS is not supported");
     } else if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
-        printf ("V4L2_CID_BRIGHTNESS is not supported\n");
+            log("V4L2_CID_BRIGHTNESS is not supported");
     } else {
         memset (&control, 0, sizeof (control));
         control.id = V4L2_CID_BRIGHTNESS;
@@ -572,7 +567,7 @@ init_device(void)
 static void
 close_device(void)
 {
-    assert_fatal(-1 == close (fd), "cannot close video device's fd");
+    assert_fatal(-1 != close (fd), "cannot close video device's fd");
     fd = -1;
 }
 
@@ -581,10 +576,10 @@ open_device(void)
 {
     struct stat st;
 
-    assert_fatal(-1 == stat (dev_name, &st), "Cannot identify '%s': %d, %s\n",
+    assert_fatal(-1 != stat (dev_name, &st), "Cannot identify '%s': %d, %s\n",
             dev_name, errno, strerror (errno));
 
-    assert_fatal(!S_ISCHR (st.st_mode), "%s is no device\n",
+    assert_fatal(S_ISCHR (st.st_mode), "%s is no device\n",
             dev_name);
 
     fd = open (dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
