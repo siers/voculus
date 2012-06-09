@@ -1,6 +1,6 @@
 #pragma once
 
-int video_init();
+void video_init(void*);
 int video_die();
 
 struct video {

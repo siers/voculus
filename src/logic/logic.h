@@ -1,6 +1,6 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-int logic_init();
+void logic_init(void*);
 
 #endif /* LOGIC_H */

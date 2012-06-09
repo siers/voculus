@@ -10,22 +10,21 @@
 int video_width  = 640;
 int video_height = 480;
 
-int
-video_init()
+void
+video_init(void* arg)
 {
     log("initializing video");
     video_specific_init();
-
-    return 0;
+    video_specific_die();
 }
 
 int
 video_get_array_size()
 {
-    return width * height * 2;
+    return video_width * video_height * 2;
 }
 
-char*** matrix
+char***
 video_get_array()
 {
     return video_get_array();

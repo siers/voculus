@@ -1,6 +1,6 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-int graph_init();
+void graph_init(void*);
 
 #endif /* GRAPH_H */

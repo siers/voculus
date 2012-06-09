@@ -1,9 +1,7 @@
 #include "everything.h"
 
-int
-logic_init()
+void
+logic_init(void* arg)
 {
     log("initializing logic");
-
-    return 0;
 }

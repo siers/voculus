@@ -8,12 +8,13 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <time.h>
+#include <string.h>
 
 #include <asm/types.h>          /* for videodev2.h */
 
 #include <linux/videodev2.h>
 
-#include "everything.h"
+#include "../everything.h"
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
@@ -58,6 +59,7 @@ static void
 process_image(const void * p)
 {
     int i, j;
+    char scale[] = "12345678";
     unsigned char luma;
 
     for (j = 0; j < 480; j ++) {
@@ -120,7 +122,7 @@ read_frame(void)
                 }
             }
 
-            assert (buf.index < n_buffers);
+            assert(buf.index < n_buffers, "non-fatal assert");
 
             process_image (buffers[buf.index].start);
 
@@ -155,7 +157,7 @@ read_frame(void)
                         && buf.length == buffers[i].length)
                     break;
 
-            assert (i < n_buffers);
+            assert(i < n_buffers, "non-fatal assert");
 
             process_image ((void *) buf.m.userptr);
 
@@ -169,44 +171,36 @@ read_frame(void)
 }
 
 static void
-mainloop(void)
+capture()
 {
-    unsigned int count;
+    for (;;) {
+        fd_set fds;
+        struct timeval tv;
+        int r;
 
-    count = 1000;
+        FD_ZERO (&fds);
+        FD_SET (fd, &fds);
 
-    while (count-- > 0) {
-        for (;;) {
-            fd_set fds;
-            struct timeval tv;
-            int r;
+        /* Timeout. */
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
 
-            FD_ZERO (&fds);
-            FD_SET (fd, &fds);
+        r = select (fd + 1, &fds, NULL, NULL, &tv);
 
-            /* Timeout. */
-            tv.tv_sec = 2;
-            tv.tv_usec = 0;
+        if (-1 == r) {
+            if (EINTR == errno)
+                continue;
 
-            r = select (fd + 1, &fds, NULL, NULL, &tv);
-
-            if (-1 == r) {
-                if (EINTR == errno)
-                    continue;
-
-                errno_exit ("select");
-            }
-
-            if (0 == r) {
-                fprintf (stderr, "select timeout\n");
-                exit (EXIT_FAILURE);
-            }
-
-            if (read_frame ())
-                break;
-
-            /* EAGAIN - continue select loop. */
+            assert(0, "select == -1");
         }
+
+        if (0 == r) {
+            fprintf (stderr, "select timeout\n");
+            exit (EXIT_FAILURE);
+        }
+
+        if (read_frame ())
+            break;
     }
 }
 
@@ -224,8 +218,8 @@ stop_capturing(void)
         case IO_METHOD_USERPTR:
             type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-            if (-1 == _ioctl (fd, VIDIOC_STREAMOFF, &type))
-                errno_exit ("VIDIOC_STREAMOFF");
+            assert(-1 != _ioctl (fd, VIDIOC_STREAMOFF, &type),
+                    "failure on ioctl.VIDIOC_STREAMOFF")
 
             break;
     }
@@ -602,14 +596,19 @@ open_device(void)
 int
 video_specific_init()
 {
-    dev_name = "/dev/video";
+    dev_name = "/dev/video0";
     open_device ();
     init_device ();
+    start_capturing ();
+    capture();
+    stop_capturing ();
+    uninit_device ();
+    close_device ();
 
     return 0;
 }
 
-int
+void
 video_specific_die()
 {
     stop_capturing ();

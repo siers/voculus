@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -Isrc -Wall -Wextra -c -g3 -Isrc -o
+CFLAGS = -Isrc -Wall -Wextra -Wunused-parameter -c -g3 -Isrc -o
 LDFLAGS = -lpthread
 OBJ = bin/log.o bin/thread.o bin/video/video.o bin/logic/logic.o bin/graph/graph.o bin/main.o
 
-all: bin bin/voculus
+all: bin bin/video bin/logic bin/graph bin/voculus
 
 bin/%.o: src/%.c
 	$(CC) $(CFLAGS) $@ $<
@@ -18,9 +18,8 @@ bin/voculus: $(OBJ)
 
 bin:
 	mkdir -p bin
-	mkdir -p bin/video
-	mkdir -p bin/logic
-	mkdir -p bin/graph
+bin/%:
+	mkdir -p $@
 
 clean:
-	rm bin/* -fr
+	rm bin -r

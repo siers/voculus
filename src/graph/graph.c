@@ -1,9 +1,7 @@
 #include "everything.h"
 
-int
-graph_init()
+void
+graph_init(void* arg)
 {
     log("initializing graph");
-
-    return 0;
 }

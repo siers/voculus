@@ -21,9 +21,9 @@ int loglvl = (uint16_t) -1; /* everything */
 int
 main(void)
 {
-    assert_fatal(!video_init(), "failed to init video");
-    assert_fatal(!graph_init(), "failed to init graph");
-    assert_fatal(!logic_init(), "failed to init logic");
+    assert_fatal(!thread_new(video_init, NULL), "failed to init video");
+    assert_fatal(!thread_new(graph_init, NULL), "failed to init graph");
+    assert_fatal(!thread_new(logic_init, NULL), "failed to init logic");
 
     threads_join();
 
