@@ -10,9 +10,9 @@ process_data(const void* p)
     char scale[] = " .,:;!#$";
     unsigned char luma;
 
-    for (j = 0; j < 480; j+=20) {
-        for (i = 640; i > 0; i-=10) {
-            luma = ((unsigned char*) p)[(i + j * 640)*2];
+    for (j = 0; j < video.height; j+=20) {
+        for (i = video.width; i > 0; i-=10) {
+            luma = ((unsigned char*) p)[(i + j * video.width) * 2];
             putchar(scale[(int) ((1 - luma / 255.0) * sizeof scale)]);
         }
         putchar('\n');

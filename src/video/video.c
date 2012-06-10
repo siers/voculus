@@ -17,6 +17,7 @@ video_init(void* arg)
     log("initializing video");
     thread_mutex_init(video.array);
     video.array.val = NULL;
+
     video_specific_init();
     video_specific_die();
 }
