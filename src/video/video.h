@@ -1,6 +1,6 @@
 #pragma once
 
-void video_init(void*);
+void video_init();
 int video_die();
 
 int video_get_array_size();

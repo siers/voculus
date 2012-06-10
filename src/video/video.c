@@ -12,9 +12,9 @@ struct video video = {
 };
 
 void
-video_init(void* arg)
+video_init()
 {
-    log("initializing video");
+    log("Initializing video.");
 
     thread_mutex_init(video.array);
     video.array.val = NULL;

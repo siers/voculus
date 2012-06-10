@@ -217,7 +217,7 @@ init_device(void)
         memset (&control, 0, sizeof (control));
         control.id = V4L2_CID_BRIGHTNESS;
         control.value = queryctrl.default_value;
-        log("V4L2_CID_BRIGHTNESS set to = %i", queryctrl.default_value);
+        log("Brightness set to %i.", queryctrl.default_value);
     }
 
     if (-1 == _ioctl (video.fd, VIDIOC_QUERYCAP, &cap)) {

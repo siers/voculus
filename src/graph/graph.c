@@ -32,8 +32,8 @@ loop()
 }
 
 void
-graph_init(void* arg)
+graph_init()
 {
-    log("initializing graph");
+    log("Initializing graph.");
     //loop();
 }

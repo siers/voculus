@@ -4,10 +4,10 @@ int main_thread_count;
 thread_t threads[10];
 
 int
-thread_new(void (*start_routine)(void*), void* arg)
+thread_new(void (*start_routine)(void*))
 {
     return pthread_create(&threads[main_thread_count++], NULL,
-            (void *(*)(void*)) start_routine, arg);
+            (void *(*)(void*)) start_routine, NULL);
 }
 
 void

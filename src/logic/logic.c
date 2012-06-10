@@ -68,7 +68,7 @@ logic_init(void* arg)
 {
     int time = 3;
 
-    log("initializing logic");
+    log("Initializing logic.");
 
     div_w = video.width  / DIV;
     div_h = video.height / DIV;

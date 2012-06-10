@@ -18,5 +18,5 @@ void thread_mutex_init(struct thread_mutex);
 void thread_lock  (struct thread_mutex);
 void thread_unlock(struct thread_mutex);
 
-int  thread_new(void (*start_routine)(void*), void* arg);
+int  thread_new(void (*start_routine)(void*));
 void threads_join();
