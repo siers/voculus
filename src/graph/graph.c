@@ -1,8 +1,5 @@
 #include "everything.h"
 
-#include <stdio.h>
-#include <unistd.h>
-
 static void
 process_data(const void* p)
 {
@@ -13,25 +10,24 @@ process_data(const void* p)
     for (j = 0; j < video.height; j+=20) {
         for (i = video.width; i > 0; i-=10) {
             luma = ((unsigned char*) p)[(i + j * video.width) * 2];
-            putchar(scale[(int) ((1 - luma / 255.0) * sizeof scale)]);
+            fputc(scale[(int) ((1 - luma / 255.0) * sizeof scale)], stderr);
         }
-        putchar('\n');
+        fputc('\n', stderr);
     }
-    fflush(stdout);
+    fflush(stderr);
 }
 
 static void
 loop()
 {
+    void* mem;
+
     for (;;) {
-        thread_lock(video.array);
-
-        if (video.array.val)
-            process_data(video.array.val);
-
-        thread_unlock(video.array);
-
-        usleep(66666);
+        if (video.array.val) {
+            mem = video_array_cpy();
+            process_data(mem);
+            free(mem);
+        }
     }
 }
 
@@ -39,5 +35,5 @@ void
 graph_init(void* arg)
 {
     log("initializing graph");
-    loop();
+    //loop();
 }

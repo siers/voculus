@@ -11,9 +11,27 @@ thread_new(void (*start_routine)(void*), void* arg)
 }
 
 void
+thread_cond_init(thread_cond_t *c)
+{
+    assert_fatal(pthread_cond_init(c, NULL) == 0, "unable to init cond");
+}
+
+void
+thread_cond_wait(thread_cond_t *c, struct thread_mutex m)
+{
+    assert(pthread_cond_wait(c, &m.m) == 0, "unable to wait for cond")
+}
+
+void
+thread_cond_broadcast(thread_cond_t *c)
+{
+    assert(pthread_cond_broadcast(c) == 0, "unable to braodcast cond");
+}
+
+void
 thread_mutex_init(struct thread_mutex l)
 {
-    pthread_mutex_init(&l.m, NULL);
+    assert_fatal(pthread_mutex_init(&l.m, NULL) == 0, "unable to init mutex");
 }
 
 void

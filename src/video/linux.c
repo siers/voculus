@@ -71,7 +71,7 @@ read_frame(void)
 
     thread_lock(video.array);
     video.array.val = buffers[buf.index].start;
-    thread_unlock(video.array);
+    thread_cond_broadcast(&video.array_new);
 
     assert_fatal(-1 != _ioctl (video.fd, VIDIOC_QBUF, &buf),
             "failure on ioctl.VIDIOC_QBUF");
@@ -206,7 +206,6 @@ init_device(void)
 
     memset (&queryctrl, 0, sizeof (queryctrl));
     queryctrl.id = V4L2_CID_BRIGHTNESS;
-
     if (-1 == ioctl (video.fd, VIDIOC_QUERYCTRL, &queryctrl)) {
         if (errno != EINVAL)
             log("failure on ioctl.VIDIOC_QUERYCTRL");
