@@ -7,6 +7,8 @@ struct video {
     int width;
     int height;
 
+    struct thread_mutex array;
+
     char* dev_name;
     int fd;
 } video;

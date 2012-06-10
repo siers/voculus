@@ -43,23 +43,6 @@ _ioctl(int fd, int request, void * arg)
     return r;
 }
 
-static void
-process_data(const void* p)
-{
-    int i, j;
-    char scale[] = " .,:;!#$";
-    unsigned char luma;
-
-    for (j = 0; j < 480; j+=20) {
-        for (i = 640; i > 0; i-=10) {
-            luma = ((unsigned char*) p)[(i + j * 640)*2];
-            fputc(scale[(int) ((1 - luma / 255.0) * sizeof scale)], stdout);
-        }
-        fputc('\n',stdout);
-    }
-    fflush (stdout);
-}
-
 static int
 read_frame(void)
 {
@@ -86,7 +69,9 @@ read_frame(void)
 
     assert(buf.index < n_buffers, "non-fatal assert");
 
-    process_data(buffers[buf.index].start);
+    thread_lock(video.array);
+    video.array.val = buffers[buf.index].start;
+    thread_unlock(video.array);
 
     assert_fatal(-1 != _ioctl (video.fd, VIDIOC_QBUF, &buf),
             "failure on ioctl.VIDIOC_QBUF");

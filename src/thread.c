@@ -10,6 +10,24 @@ thread_new(void (*start_routine)(void*), void* arg)
             (void *(*)(void*)) start_routine, arg);
 }
 
+void
+thread_mutex_init(struct thread_mutex l)
+{
+    pthread_mutex_init(&l.m, NULL);
+}
+
+void
+thread_lock(struct thread_mutex l)
+{
+    assert_fatal(pthread_mutex_lock(&l.m) == 0, "unable to lock thread");
+}
+
+void
+thread_unlock(struct thread_mutex l)
+{
+    assert_fatal(pthread_mutex_unlock(&l.m) == 0, "unable to unlock thread");
+}
+
 static void
 join(thread_t thread)
 {

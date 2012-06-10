@@ -1,5 +1,4 @@
-#ifndef EVERYTHING_H
-#define EVERYTHING_H
+#pragma once
 
 #include <stdint.h>
 
@@ -9,5 +8,3 @@
 #include "video/video.h"
 #include "logic/logic.h"
 #include "graph/graph.h"
-
-#endif /* EVERYTHING_H */
