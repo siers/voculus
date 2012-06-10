@@ -4,6 +4,8 @@
 static int div_w;
 static int div_h;
 
+struct logic logic;
+
 static unsigned char*
 small_frame()
 {
@@ -27,24 +29,23 @@ static char
 frame_cmp(unsigned char* a, unsigned char* b)
 {
     int offset = div_w / 2 + (div_h / 2) * div_w;
+    char result;
+    int *buf;
 
-    return abs(a[offset] - b[offset]) > 15;
-}
+    result = abs(a[offset] - b[offset]) > 15;
 
-static void
-print_frame(uint8_t* f)
-{
-    int w,h;
-    char scale[] = " .,:;!#$";
-    uint8_t pixel;
-
-    for (h = 0; h < div_h; h+=2) {
-        for (w = 0; w < div_w; w++) {
-            pixel = f[w + h * div_w];
-            putchar(scale[(int) ((1 - pixel/ 255.0) * sizeof scale)]);
-        }
-        putchar('\n');
+    if (result) {
+        thread_lock(logic.data);
+        memset(logic.data.val, 0, logic.samples);
+        buf = logic.data.val;
+        buf[0] = 0xde;
+        buf[1] = 0xad;
+        buf[2] = 0xbe;
+        buf[3] = 0xef;
+        thread_unlock(logic.data);
     }
+
+    return result;
 }
 
 static void
@@ -56,19 +57,26 @@ loop()
     for (;;) {
         new = small_frame();
 
-        //print_frame(new);
-        assert(!frame_cmp(initial, new), "Spot on!");
+        if (frame_cmp(initial, new)) {
+            log("Tada!");
+            thread_cond_broadcast(&logic.data_arrived);
+        }
 
         free(new);
     }
 }
 
 void
-logic_init(void* arg)
+logic_init()
 {
     int time = 3;
 
     log("Initializing logic.");
+
+    thread_mutex_init(logic.data);
+    thread_cond_init(&logic.data_arrived);
+    logic.samples  = 100;
+    logic.data.val = malloc(sizeof(int) * (logic.samples+1));
 
     div_w = video.width  / DIV;
     div_h = video.height / DIV;

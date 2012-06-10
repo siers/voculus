@@ -15,14 +15,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "everything.h"
+#include <locale.h>
+
 int loglvl = (uint16_t) -1; /* everything */
 
 int
 main(void)
 {
+    setlocale(LC_CTYPE, "");
+
     assert_fatal(!thread_new(video_init), "failed to init video");
-    assert_fatal(!thread_new(graph_init), "failed to init graph");
     assert_fatal(!thread_new(logic_init), "failed to init logic");
+    assert_fatal(!thread_new(demonstr_init), "failed to init demonstr");
 
     threads_join();
 

@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "thread.h"
 
 #include "log.h"
 #include "video/video.h"
 #include "logic/logic.h"
-#include "graph/graph.h"
+#include "demonstr/demonstr.h"
