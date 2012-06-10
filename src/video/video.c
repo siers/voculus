@@ -7,8 +7,10 @@
 #endif /* __linux */
 
 /* the sane defaults */
-int video_width  = 640;
-int video_height = 480;
+struct video video = {
+    .width  = 640,
+    .height = 480
+};
 
 void
 video_init(void* arg)
@@ -21,7 +23,7 @@ video_init(void* arg)
 int
 video_get_array_size()
 {
-    return video_width * video_height * 2;
+    return video.width * video.height * 2;
 }
 
 char***

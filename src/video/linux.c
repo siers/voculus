@@ -24,14 +24,12 @@ typedef enum {
     IO_METHOD_USERPTR,
 } io_method;
 
-struct buffer {
+struct video_buffer {
     void   *start;
     size_t length;
 };
 
-static char *dev_name           = NULL;
-static int fd                   = -1;
-static struct buffer *buffers   = NULL;
+static struct video_buffer *buffers   = NULL;
 static unsigned int n_buffers   = 0;
 
 static int
@@ -72,7 +70,7 @@ read_frame(void)
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
 
-    if (-1 == _ioctl (fd, VIDIOC_DQBUF, &buf)) {
+    if (-1 == _ioctl (video.fd, VIDIOC_DQBUF, &buf)) {
         switch (errno) {
             case EAGAIN:
                 return 0;
@@ -90,7 +88,7 @@ read_frame(void)
 
     process_data(buffers[buf.index].start);
 
-    assert_fatal(-1 != _ioctl (fd, VIDIOC_QBUF, &buf),
+    assert_fatal(-1 != _ioctl (video.fd, VIDIOC_QBUF, &buf),
             "failure on ioctl.VIDIOC_QBUF");
 
     return 1;
@@ -105,13 +103,13 @@ capture()
         int r;
 
         FD_ZERO (&fds);
-        FD_SET (fd, &fds);
+        FD_SET (video.fd, &fds);
 
         /* Timeout. */
         tv.tv_sec = 2;
         tv.tv_usec = 0;
 
-        r = select (fd + 1, &fds, NULL, NULL, &tv);
+        r = select (video.fd + 1, &fds, NULL, NULL, &tv);
 
         if (-1 == r) {
             if (EINTR == errno)
@@ -140,13 +138,13 @@ start_capturing(void)
         buf.memory      = V4L2_MEMORY_MMAP;
         buf.index       = i;
 
-        assert_fatal(-1 != _ioctl (fd, VIDIOC_QBUF, &buf),
+        assert_fatal(-1 != _ioctl (video.fd, VIDIOC_QBUF, &buf),
             "failure on ioctl.VIDIOC_QBUF");
     }
 
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    assert_fatal(-1 != _ioctl (fd, VIDIOC_STREAMON, &type),
+    assert_fatal(-1 != _ioctl (video.fd, VIDIOC_STREAMON, &type),
         "failure on ioctl.VIDIOC_STREAMON");
 }
 
@@ -171,16 +169,16 @@ init_mmap(void)
     req.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory              = V4L2_MEMORY_MMAP;
 
-    if (-1 == _ioctl (fd, VIDIOC_REQBUFS, &req)) {
+    if (-1 == _ioctl (video.fd, VIDIOC_REQBUFS, &req)) {
         if (EINVAL == errno) {
             assert_fatal(0, "%s does not support "
-                "memory mapping", dev_name);
+                "memory mapping", video.dev_name);
         } else {
             assert_fatal(0, "failure on ioctl.VIDIOC_REQBUFS");
         }
     }
 
-    assert_fatal(req.count >= 2, "Insufficient buffer memory on %s", dev_name);
+    assert_fatal(req.count >= 2, "Insufficient buffer memory on %s", video.dev_name);
 
     buffers = calloc (req.count, sizeof (*buffers));
 
@@ -195,7 +193,7 @@ init_mmap(void)
         buf.memory      = V4L2_MEMORY_MMAP;
         buf.index       = n_buffers;
 
-        assert_fatal(-1 != _ioctl (fd, VIDIOC_QUERYBUF, &buf),
+        assert_fatal(-1 != _ioctl (video.fd, VIDIOC_QUERYBUF, &buf),
             "failure on ioctl.VIDIOC_QUERYBUF");
 
         buffers[n_buffers].length = buf.length;
@@ -204,7 +202,7 @@ init_mmap(void)
                     buf.length,
                     PROT_READ | PROT_WRITE /* required */,
                     MAP_SHARED /* recommended */,
-                    fd, buf.m.offset);
+                    video.fd, buf.m.offset);
 
         assert_fatal(MAP_FAILED != buffers[n_buffers].start, "mmap failed");
     }
@@ -224,7 +222,7 @@ init_device(void)
     memset (&queryctrl, 0, sizeof (queryctrl));
     queryctrl.id = V4L2_CID_BRIGHTNESS;
 
-    if (-1 == ioctl (fd, VIDIOC_QUERYCTRL, &queryctrl)) {
+    if (-1 == ioctl (video.fd, VIDIOC_QUERYCTRL, &queryctrl)) {
         if (errno != EINVAL)
             log("failure on ioctl.VIDIOC_QUERYCTRL");
         else
@@ -238,17 +236,17 @@ init_device(void)
         log("V4L2_CID_BRIGHTNESS set to = %i", queryctrl.default_value);
     }
 
-    if (-1 == _ioctl (fd, VIDIOC_QUERYCAP, &cap)) {
+    if (-1 == _ioctl (video.fd, VIDIOC_QUERYCAP, &cap)) {
         if (EINVAL == errno) {
             assert_fatal(0, "%s is no V4L2 device\n",
-                    dev_name);
+                    video.dev_name);
         } else {
             assert_fatal(0, "VIDIOC_QUERYCAP");
         }
     }
 
     assert_fatal(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE,
-        "%s is no video capture device", dev_name);
+        "%s is no video capture device", video.dev_name);
 
     /* Select video input, video standard and tune here. */
 
@@ -256,11 +254,11 @@ init_device(void)
 
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    if (0 == _ioctl (fd, VIDIOC_CROPCAP, &cropcap)) {
+    if (0 == _ioctl (video.fd, VIDIOC_CROPCAP, &cropcap)) {
         crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         crop.c = cropcap.defrect; /* reset to default */
 
-        if (-1 == _ioctl (fd, VIDIOC_S_CROP, &crop)) {
+        if (-1 == _ioctl (video.fd, VIDIOC_S_CROP, &crop)) {
             switch (errno) {
                 case EINVAL:
                     /* Cropping not supported. */
@@ -282,7 +280,7 @@ init_device(void)
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 
-    assert_fatal(-1 != _ioctl (fd, VIDIOC_S_FMT, &fmt),
+    assert_fatal(-1 != _ioctl (video.fd, VIDIOC_S_FMT, &fmt),
         "failure on ioctl.VIDIOC_S_FMT");
 
     /* Note VIDIOC_S_FMT may change width and height. */
@@ -301,8 +299,8 @@ init_device(void)
 static void
 close_device(void)
 {
-    assert_fatal(-1 != close (fd), "cannot close video device's fd");
-    fd = -1;
+    assert_fatal(-1 != close (video.fd), "cannot close video device's fd");
+    video.fd = -1;
 }
 
 static void
@@ -310,22 +308,22 @@ open_device(void)
 {
     struct stat st;
 
-    assert_fatal(-1 != stat (dev_name, &st), "Cannot identify '%s': %d, %s\n",
-            dev_name, errno, strerror (errno));
+    assert_fatal(-1 != stat (video.dev_name, &st), "Cannot identify '%s': %d, %s\n",
+            video.dev_name, errno, strerror (errno));
 
     assert_fatal(S_ISCHR (st.st_mode), "%s is no device\n",
-            dev_name);
+            video.dev_name);
 
-    fd = open (dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
+    video.fd = open (video.dev_name, O_RDWR /* required */ | O_NONBLOCK, 0);
 
-    assert_fatal(-1 != fd, "Cannot open '%s': %d, %s\n",
-                dev_name, errno, strerror(errno));
+    assert_fatal(-1 != video.fd, "Cannot open '%s': %d, %s\n",
+                video.dev_name, errno, strerror(errno));
 }
 
 int
 video_specific_init()
 {
-    dev_name = "/dev/video0";
+    video.dev_name = "/dev/video0";
     open_device ();
     init_device ();
     start_capturing ();
