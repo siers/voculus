@@ -1,0 +1,16 @@
+what the hell
+=============
+Threaded v4l2 app combined with ruby will look at you through webcam and when I
+finish it, it will do sound like wind chimes, but instead of wind -- you'll
+be the cause and instead of chimes, there'll be your speakers.
+
+about
+=====
+Uses V4L2, pthreads, ruby. Needs that linux thing on x86. Can be ported.
+Written in C and ruby. Should be pretty straightforward to compile, if
+you're on the same env.
+
+*Created for the amusement of self and getting more familiar with MRI's
+internals.*
+
+Credits: weechat's code, bytesex.org's capture.c, Jesus.
