@@ -1,4 +1,18 @@
 class Demonstrate
+  def initialize
+    @sounds = {
+      1 => "1C.ogg",
+      5 => "2D.ogg",
+      9 => "3E.ogg",
+      13 => "4F.ogg",
+      17 => "5G.ogg",
+      21 => "6A.ogg",
+      25 => "7B.ogg",
+      29 => "8C.ogg",
+      32 => "9D.ogg",
+    }
+  end
+
   def run
     old = {}
     keep_frames = 4
@@ -12,6 +26,9 @@ class Demonstrate
           old[sample] = keep_frames
         else
           new << sample
+          if (sound = @sounds[sample])
+            %x{mplayer data/#{ sound } &> /dev/null < /dev/null &}
+          end
         end
       end
 
@@ -35,4 +52,6 @@ rescue Exception => e
   s << e.backtrace.join("\n")
 
   puts "\n#{ s.gsub(/^/, "\t\t") }\n\n"
+
+  Demonstrate.fin
 end
