@@ -8,8 +8,9 @@ logic_data(void)
     int i;
     VALUE array;
     int* args;
+    struct timespec timeout = {.tv_sec = 1, .tv_nsec = 0};
 
-    thread_cond_wait(&logic.data_arrived, logic.data);
+    thread_cond_wait(&logic.data_arrived, logic.data, &timeout);
     args = logic.data.val;
 
     for (i = 0; i < logic.samples; i++) {

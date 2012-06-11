@@ -11,7 +11,7 @@ struct thread_mutex {
 } thread_mutex;
 
 void thread_cond_init(thread_cond_t*);
-void thread_cond_wait(thread_cond_t*, struct thread_mutex);
+void thread_cond_wait(thread_cond_t*, struct thread_mutex, struct timespec*);
 void thread_cond_broadcast(thread_cond_t *c);
 
 void thread_mutex_init(struct thread_mutex);

@@ -39,7 +39,7 @@ video_array_cpy()
     size = video_get_array_size();
     tmp = malloc(size);
 
-    thread_cond_wait(&video.array_new, video.array);
+    thread_cond_wait(&video.array_new, video.array, NULL);
     memcpy(tmp, video.array.val, size);
     thread_unlock(video.array);
 

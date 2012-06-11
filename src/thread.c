@@ -1,4 +1,5 @@
 #include "everything.h"
+#include <sys/time.h>
 
 int main_thread_count;
 thread_t threads[10];
@@ -16,10 +17,26 @@ thread_cond_init(thread_cond_t *c)
     assert_fatal(pthread_cond_init(c, NULL) == 0, "unable to init cond");
 }
 
+/* Craves relative instead of absolute time like pthread_cond_timedwait(). */
 void
-thread_cond_wait(thread_cond_t *c, struct thread_mutex m)
+thread_cond_wait(thread_cond_t *c, struct thread_mutex m, struct timespec *rel)
 {
-    assert(pthread_cond_wait(c, &m.m) == 0, "unable to wait for cond")
+    int err;
+    struct timeval t;
+
+    if (rel) {
+        assert(gettimeofday(&t, NULL) == 0, "gettimeofday failed");
+        rel->tv_sec  = rel->tv_sec  + t.tv_sec;
+        rel->tv_nsec = rel->tv_nsec + t.tv_usec * 1000;
+        err = pthread_cond_timedwait(c, &m.m, rel);
+        if (err == ETIMEDOUT) {
+            err = 0;
+        }
+    } else {
+        err = pthread_cond_wait(c, &m.m);
+    }
+
+    assert_fatal(err == 0, "unable to wait for cond");
 }
 
 void
