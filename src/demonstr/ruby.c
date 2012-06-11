@@ -3,22 +3,21 @@
 #include <ruby.h>
 
 VALUE
-get_data(void)
+logic_data(void)
 {
     int i;
     VALUE array;
-    VALUE* args = malloc(sizeof(int) * logic.samples);
+    int* args;
 
     thread_cond_wait(&logic.data_arrived, logic.data);
-    memcpy(args, logic.data.val, sizeof(int) * logic.samples);
-    thread_unlock(logic.data);
+    args = logic.data.val;
 
     for (i = 0; i < logic.samples; i++) {
         args[i] = INT2FIX(args[i]);
     }
 
-    array = rb_ary_new4(4, args);
-    free(args);
+    array = rb_ary_new4(logic.samples, logic.data.val);
+    thread_unlock(logic.data);
 
     return array;
 }
@@ -29,7 +28,8 @@ demonstr_ruby_run()
     VALUE rb_cDemonstr;
 
     rb_cDemonstr = rb_define_class("Demonstrate", rb_cObject);
-    rb_define_singleton_method(rb_cDemonstr, "logic_data", get_data, 0);
+    rb_define_singleton_method(rb_cDemonstr, "logic_data", logic_data, 0);
+    rb_define_singleton_method(rb_cDemonstr, "fin", (VALUE (*)()) exit, 0);
 
     rb_f_require(rb_mKernel, rb_str_new2(DEMONSTR_SCRIPT));
     rb_funcall(rb_mKernel, rb_intern("main"), 0);
