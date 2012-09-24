@@ -21,6 +21,7 @@ enum {
 #define log_e(fmt, ...) \
     log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
+#ifndef assert
 #define assert(condition, fmt, ...) \
     if (!(condition)) \
         log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__); \
@@ -30,5 +31,6 @@ enum {
         log_whine(MSG_ERR, __FILE__, __LINE__, fmt, ##__VA_ARGS__); \
         exit(EXIT_FAILURE); \
     }
+#endif
 
 void log_whine(int msgloglvl, char* file, int line, const char *fmt, ...);

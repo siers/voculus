@@ -1,0 +1,3 @@
+#!/bin/sh
+
+DYLD_LIBRARY_PATH=$(ruby -e "\$>.write RbConfig.expand('\$(rubylibdir)')"):$DYLD_LIBRARY_PATH ./bin/voculus "$@"

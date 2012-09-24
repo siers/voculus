@@ -2,7 +2,7 @@
 #include <sys/time.h>
 
 int main_thread_count;
-thread_t threads[10];
+pthread_t threads[10];
 
 int
 thread_new(void (*start_routine)(void*))
@@ -64,7 +64,7 @@ thread_unlock(struct thread_mutex l)
 }
 
 static void
-join(thread_t thread)
+join(pthread_t thread)
 {
     void *retval;
 

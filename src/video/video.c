@@ -1,10 +1,5 @@
 #include "everything.h"
 
-#ifdef __linux
-#include "video/linux.h"
-#include "video/linux.c"
-#endif /* __linux */
-
 /* the sane defaults */
 struct video video = {
     .width  = 640,
@@ -20,7 +15,7 @@ video_init()
     video.array.val = NULL;
     thread_cond_init(&video.array_new);
 
-    video_specific_init();
+    video_specific_init(); // Should loop.
     video_specific_die();
 }
 
