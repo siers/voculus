@@ -1,5 +1,5 @@
-/*  Voculus -- the eye of webcam.
-    Copyright (C) 2012 siers */
+/*  Voculus -- the eye of webcam. */
+/*     of the copyleft license    */
 
 #include "everything.h"
 #include <locale.h>
